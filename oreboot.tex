@@ -98,15 +98,81 @@ for i in xs {
 
 \subsection{*Boot Flow}
 
+\begin{itemize}
+    \item \textbf{Boot Blob}: Executes directly from flash
+First instruction
+Initialize CPU
+Debug UART print “Welcome to Oreboot”
+Setup SRAM/CAR
+Find and jump to Rom Stage
+A fair bit of assembly code
+    \item \textbf{Rom Stage}: Executes directly from flash
+Has very little ~30KiB-8MiB of SRAM/CAR. Not enough for Linux yet!
+Initialize RAM
+    \item \textbf{Payloader stage}: Has one job
+Find, load and run a payload
+The payloader has no drivers, storage drivers, USB stack, etc… This is a big complexity reduction compared to your classic coreboot.
+    \item \textbf{LinuxBoot}: Linux + Initramfs (or another kernel of your choosing)
+Kernel (not oreboot) can optionally load another kernel from the disk or network and kexec
+    \item \textbf{OS}
+\end{itemize}
+
 \subsection{*Driver Model}
+
+\begin{verbatim}
+pub type Result<T> = core::result::Result<T, &'static str>;
+pub const EOF: Result<usize> = Err("EOF");
+pub const NOT_IMPLEMENTED: Result<usize> = Err("not implemented");
+
+pub trait Driver {
+	/// Initialize the device.
+	fn init(&mut self) -> Result<()>;
+	/// Positional read. Returns number of bytes read.
+	fn pread(&self, data: &mut [u8], pos: usize) -> Result<usize>;
+	/// Positional write. Returns number of bytes written.
+	fn pwrite(&mut self, data: &[u8], pos: usize) -> Result<usize>;
+	/// Shutdown the device.
+	fn shutdown(&mut self);
+}
+\end{verbatim}
 
 \section{*Use Cases}
 
 \subsection{*RISCV - OpenTitan}
 
+RISC-V rv32imc
+Embedded, not Linux capable
+Open-source design for a root-of-trust
+No ASIC available yet
+Oreboot current runs on:
+Verilator
+FPGA (Artix-7)
+Currently trying to boot Tock kernel
+
 \subsection{*ARM - u-BMC}
 
+ARM11
+BMC Platform
+Open-source memory initialization code
+Converted to .rs with a Go program
+Bootblob
+1. Initialize CPU
+2. Initialize Bus
+3. Initial UART Print
+4. Initialize SRAM
+Romstage
+5. Memory init
+
+
 \subsection{*x86}
+
+We prefer all pieces of the firmware to be open-source; but can accept an ME and FSP binary blob for x86 architectures.
+Blobs must be essential to boot the system and not provide any extraneous functionality which could not be implemented in Oreboot.
+Blobs must be redistributable and are ideally available on GitHub.
+Blobs must not be submitted to github.com/oreboot/oreboot. We prefer blobs to be submitted to github.com/oreboot/blobs, github.com/coreboot/blobs or some other GitHub repository.
+The blobs must be in a binary format. No additional C code, assembly files or header files are acceptable.
+Any compromises to the language safety features of Rust must be explicitly stated.
+
 
 \section*{Acknowledgment}
 
