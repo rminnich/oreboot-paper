@@ -31,8 +31,8 @@ email address or ORCID}
 Firmware is the software that first runs on CPUs when they are turned on. 
 The term "firmware" arises from the fact that it is stored in memory which maintains
 its contents across power cycles, so-called non-volatile memory (NVRAM). 
-Because of its crucial place in startup, firmware has proven to be an effective place to store security exploits\cite{cui2013firmware}. Many of these exploits are made easier
-by simple programming practice errors not caught by C compilers.
+Because of its crucial place in startup, its proprietary nature, and the difficulty in changing it, firmware has proven to be an effective place to store security exploits\cite{cui2013firmware}. Many of these exploits are made easier
+by simple programming practice errors not caught by C compilers\cite{wojtczuk2015attacks}.
 
 We have written oreboot, a new open source, portable firmware system. 
 oreboot is written in Rust\cite{balasubramanian2017system}, a new language which 
