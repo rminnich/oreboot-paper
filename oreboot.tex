@@ -49,8 +49,44 @@ oreboot, firmware, coreboot
 \end{IEEEkeywords}
 
 \section{*Introduction}
+\subsection{*The nature of firmware}
+The software that runs on hardware is always loaded by software already running on the hardware. 
+It is reasonable to ask: how does this work at the start? What software chicken lays the first software egg, from which grow more software-laying chickens?
+This fundamental question is rarely asked, rarely answered, and little understood; yet it lies at the heart of how our computers work.
+It has also changed very little since the earliest computers.
+For purposes of discussion, we are going to exclude systems created before 1965, i.e. we will discuss only "modern" systems.
+Computers at power-on/reset (usually called POR) need to have something to run, and that is where firmware comes in. Firmware is made accesible to the CPU so it can load another, more complex program from a disk, magnetic tape, paper tape, or other media. Rarely, this more complex program is a full operating system; most commonly it is another step in the boot sequence\footnote{there are exceptions, e.g. \cite{minnich2000linux}.}
+The sequence used on modren ARM systems is typical:
+\begin{itemize}
+    \item At Power-On/Reset the CPU  executes Read-Only Memory (ROM) code (Boot Level 0, or BL0) stored in the chip itself  and verifies and loads code (BL1) from FLASH into on-chip SRAM
+    \item The BL1 copies a BL2 from FLASH to on-chip SRAM
+    \item The larger, more complex BL2 gets memory working, and copies a BL3 into memory
+    \item The BL3, which nowadays has up to four components, loads more parts of itself into memory
+    \item The BL3, having found a boot medium, loads a \textit{boot block} from it
+    \item The boot block is a direct analog of the BL0, in that it is small and exists only to load a more complex program, this time from the boot medium
+    \item The next, more complex program locates a kernel and loads it
+    \item The kernel runs and, in some cases, fetches a kernel, and replaces itself with it
+\end{itemize}
 
-Downstream fork of coreboot\cite{minnich2000linux}
+This process, in similar form, plays out on every computer system we use today. But the question remains: what starts the process off? As we have seen, on many ARM systems, it is started by software burned into the chip itself -- the mask ROM. 
+While that is not the only way CPU firmware is provided, it is typical. 
+In general, there are two main techniques to provide firmware at Power-On/Reset:
+\begin{enumerate}
+    \item a small auxiliary processor loads a firmware into memory or L1 cache. This technique is used in mainframes, some minicomputers, the DEC Alpha, and modern AMD cpus. 
+\item a nonvolatile memory, sometimes readonly, contains a program that loads a more complex program
+\end{enumerate}
+The first technique requires a processor to load the firmware; that processor in turn has firmware. In one system, IBM's Power 8, Power 8 firmware is loaded by an AIX workstation. The firmware for the CPU in that workstation is loaded by a smaller Power PC CPU. That CPU loads its firmware from a memory-addressable FLASH part. 
+
+In all cases, when we chase the source of firmware down to its origin, there is always a memory-addressable part somewhere in this chain containing firmware for a CPU.
+This paper concerns what firmware those CPUs run, be it loaded via a smaller CPU, or contained in a non-volatle memory. 
+
+\subsection{*oreboot}
+
+how it is implemented 
+security issues 
+open source firmware projects
+coreboot
+oreboot as a downstream fork of coreboot\cite{minnich2000linux}
 Open-source and GPLv2
 Rust
 Absolutely no C code.
